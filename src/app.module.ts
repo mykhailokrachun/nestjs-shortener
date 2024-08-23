@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { seconds, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { redisStore } from 'cache-manager-redis-yet';
-import { Redis } from 'ioredis';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 
 import type { RedisClientOptions } from 'redis';
@@ -21,14 +20,26 @@ import { LinksModule } from './links/links.module';
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        store: await redisStore({
-          socket: {
-            host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
-          },
-        }),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const redis = configService.get<string>('REDIS_HOST');
+
+        if (redis === 'redis') {
+          return {
+            store: await redisStore({
+              socket: {
+                host: configService.get('REDIS_HOST'),
+                port: configService.get('REDIS_PORT'),
+              },
+            }),
+          };
+        } else {
+          return {
+            store: await redisStore({
+              url: configService.get('REDIS_HOST'),
+            }),
+          };
+        }
+      },
       isGlobal: true,
     }),
     LinksModule,
@@ -53,10 +64,7 @@ import { LinksModule } from './links/links.module';
           },
         ],
         storage: new ThrottlerStorageRedisService(
-          new Redis({
-            host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
-          }),
+          configService.get('REDIS_HOST'),
         ),
       }),
       inject: [ConfigService],
