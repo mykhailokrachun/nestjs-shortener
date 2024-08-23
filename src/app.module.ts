@@ -16,16 +16,14 @@ import { LinksModule } from './links/links.module';
   imports: [
     ConfigModule.forRoot({
       validationSchema: configValidationSchema,
+      envFilePath: [`.env${process.env.MODE ? `.${process.env.MODE}` : ''}`],
     }),
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         store: await redisStore({
-          url:
-            configService.get<string>('REDIS_HOST') === 'redis'
-              ? `redis://${configService.get<string>('REDIS_HOST')}:${configService.get<number>('REDIS_PORT')}`
-              : configService.get<string>('REDIS_HOST'),
+          url: configService.get('REDIS_HOST'),
         }),
       }),
       isGlobal: true,
