@@ -20,26 +20,14 @@ import { LinksModule } from './links/links.module';
     CacheModule.registerAsync<RedisClientOptions>({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const redis = configService.get<string>('REDIS_HOST');
-
-        if (redis === 'redis') {
-          return {
-            store: await redisStore({
-              socket: {
-                host: configService.get('REDIS_HOST'),
-                port: configService.get('REDIS_PORT'),
-              },
-            }),
-          };
-        } else {
-          return {
-            store: await redisStore({
-              url: configService.get('REDIS_HOST'),
-            }),
-          };
-        }
-      },
+      useFactory: async (configService: ConfigService) => ({
+        store: await redisStore({
+          url:
+            configService.get<string>('REDIS_HOST') === 'redis'
+              ? `redis://${configService.get<string>('REDIS_HOST')}:${configService.get<number>('REDIS_PORT')}`
+              : configService.get<string>('REDIS_HOST'),
+        }),
+      }),
       isGlobal: true,
     }),
     LinksModule,
