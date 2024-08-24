@@ -86,7 +86,7 @@ describe('LinksService', () => {
 
   describe('shortLinkRedirector', () => {
     it('should return the URL from cache and increment clicks', async () => {
-      const getSpy = jest
+      const getCacheSpy = jest
         .spyOn(cache, 'get')
         .mockResolvedValue({ url: 'https://example.com' });
 
@@ -106,12 +106,12 @@ describe('LinksService', () => {
 
       const result = await service.shortLinkRedirector('abc123');
 
-      expect(getSpy).toHaveBeenCalledWith('abc123');
+      expect(getCacheSpy).toHaveBeenCalledWith('abc123');
       expect(result).toEqual('https://example.com');
     });
 
     it('should return the URL from the database if not in cache', async () => {
-      const getSpy = jest.spyOn(cache, 'get').mockResolvedValue(null);
+      const getCacheSpy = jest.spyOn(cache, 'get').mockResolvedValue(undefined);
       const findOneSpy = jest.spyOn(repository, 'findOneBy').mockResolvedValue({
         _id: 'id123',
         code: 'abc123',
@@ -124,14 +124,14 @@ describe('LinksService', () => {
         url: 'https://example.com',
         clicks: 1,
       });
-      const setSpy = jest.spyOn(cache, 'set').mockResolvedValue(undefined);
+      const setCacheSpy = jest.spyOn(cache, 'set').mockResolvedValue(undefined);
 
       const result = await service.shortLinkRedirector('abc123');
 
-      expect(getSpy).toHaveBeenCalledWith('abc123');
+      expect(getCacheSpy).toHaveBeenCalledWith('abc123');
       expect(findOneSpy).toHaveBeenCalledWith({ code: 'abc123' });
       expect(saveSpy).toHaveBeenCalled();
-      expect(setSpy).toHaveBeenCalledWith(
+      expect(setCacheSpy).toHaveBeenCalledWith(
         'abc123',
         { url: 'https://example.com' },
         RedisTtl.ONE_DAY,
@@ -140,7 +140,7 @@ describe('LinksService', () => {
     });
 
     it('should throw NotFoundException if the link is not found', async () => {
-      jest.spyOn(cache, 'get').mockResolvedValue(null);
+      jest.spyOn(cache, 'get').mockResolvedValue(undefined);
       jest.spyOn(repository, 'findOneBy').mockResolvedValue(null);
 
       await expect(service.shortLinkRedirector('abc123')).rejects.toThrow(
