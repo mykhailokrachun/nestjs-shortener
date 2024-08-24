@@ -33,7 +33,6 @@
     "cache-manager-redis-yet": "^5.1.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "ioredis": "^5.4.1",
     "mongodb": "^5.9.2",
     "nestjs-throttler-storage-redis": "^0.5.0",
     "redis": "^4.7.0",
