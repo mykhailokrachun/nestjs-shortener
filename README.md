@@ -53,6 +53,12 @@ If you want to run the application with local MongoDB and Redis instances using 
 
    This will build and start the application along with MongoDB and Redis in Docker containers. The API will be available at `http://localhost:3000`.
 
+**_Note:_** In case you want to change the .env.local file, you need to rebuild the docker image and after that run the application with docker compose:
+
+```bash
+docker compose build
+```
+
 ### Option 2: Run with External Databases
 
 If you prefer to use external MongoDB and Redis services (e.g., on Render or another cloud provider):
