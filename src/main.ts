@@ -13,7 +13,6 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('NestJS Shortener API')
     .setVersion('1.0')
-    .addTag('shortener')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
